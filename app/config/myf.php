@@ -11,6 +11,7 @@ return [
             '/mysql/create' => ['Mysql', 'create'],
             '/mysql/bulk' => ['Mysql', 'bulk'],
             '/mysql/single' => ['Mysql', 'single'],
+            '/mysql/tran' => ['Mysql', 'tran'],
         ],
         // pcre正则路由
         'regex' => [],

@@ -26,7 +26,7 @@ END;
     }
 
     /**
-     * 批量插入
+     * 合并插入
      */
     public function bulk($startId, $times, $batchSize = 100)
     {
@@ -58,6 +58,8 @@ END;
 
     /**
      * 单条插入
+     * @param $startId
+     * @param $times
      */
     public function single($startId, $times)
     {
@@ -69,6 +71,37 @@ END;
             $sql = "insert ignore into `bulk`(`key`, `name`) values (:key, :name)";
             $this->db->exec($sql, [':key' => $key, ':name' => strval(time())]);
 
+            if ($i % 10000 == 0) {
+                echo $i / (microtime(true) - $s) . PHP_EOL;
+            }
+        }
+
+        echo "总耗时:" . (microtime(true) - $s) . PHP_EOL;
+    }
+
+    /**
+     * 事务插入
+     */
+    public function tran($startId, $times, $batchSize = 100)
+    {
+        $values = [];
+
+        $s = microtime(true);
+
+        for ($i = 0; $i < $times; ++$i) {
+            $key = $startId + $i;
+
+            $values[] = [$key, strval(time())];
+            if (count($values) == $batchSize) {
+                $this->db->begin();
+                foreach ($values as $value) {
+                    $sql = "insert ignore into `bulk`(`key`, `name`) values(?,?)";
+                    $this->db->exec($sql, $value);
+                }
+                $this->db->commit();
+
+                $values = [];
+            }
             if ($i % 10000 == 0) {
                 echo $i / (microtime(true) - $s) . PHP_EOL;
             }
